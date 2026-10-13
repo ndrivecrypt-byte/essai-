@@ -1,81 +1,153 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="h-full bg-zinc-950">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Budget Personnel</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Finances - Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://jsdelivr.net"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com"></script>
+    <style>
+        @import url('https://googleapis.com');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body>
-    <div class="container">
-        <h1>📊 Gestion de Budget Personnel</h1>
-        
-        <!-- Section Configuration Revenus -->
-        <div class="card">
-            <h2>💰 Vos Revenus Mensuels</h2>
-            <div class="input-group">
-                <label for="revenu-total">Entrez votre revenu net (€) :</label>
-                <input type="number" id="revenu-total" value="2000" min="0">
-                <button id="btn-calculer">Appliquer la règle 50/30/20</button>
-            </div>
-        </div>
+<body class="h-full text-zinc-400 antialiased bg-zinc-950">
 
-        <!-- Section Graphique / Résumé visuel -->
-        <div class="dashboard-grid">
-            <div class="card summary-card">
-                <h3>Besoins (50%)</h3>
-                <p class="description">Loyer, factures, courses...</p>
-                <div class="progress-bar"><div id="barre-besoins" class="progress"></div></div>
-                <p class="stats"><span id="depense-besoins">0</span>€ / <span id="limite-besoins">1000</span>€</p>
+    <!-- Wrapper Principal -->
+    <div class="min-h-full flex flex-col">
+        <!-- Header Premium -->
+        <header class="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur sticky top-0 z-50">
+            <div class="mx-auto max-w-7xl px-6 h-14 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="bg-zinc-800 p-1.5 rounded-md border border-zinc-700">
+                        <i data-lucide="layers" class="text-zinc-200 w-4 h-4"></i>
+                    </div>
+                    <span class="text-sm font-semibold tracking-tight text-zinc-200">AssetFlow <span class="text-zinc-500 font-mono text-xs border border-zinc-800 px-1.5 py-0.5 rounded ml-1.5">v2.1</span></span>
+                </div>
+                <div class="flex items-center gap-4 text-xs font-mono">
+                    <span class="text-zinc-500" id="live-clock">Octobre 2026</span>
+                </div>
             </div>
-            <div class="card summary-card">
-                <h3>Envies (30%)</h3>
-                <p class="description">Loisirs, sorties, shopping...</p>
-                <div class="progress-bar"><div id="barre-envies" class="progress"></div></div>
-                <p class="stats"><span id="depense-envies">0</span>€ / <span id="limite-envies">6000</span>€</p>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="flex-grow mx-auto max-w-7xl w-full px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- CONTROLES & TRANSACTIONS (Gauche - 7 Colonnes) -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- KPI & Reste à vivre -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-zinc-900 border border-zinc-800/80 rounded-lg p-5">
+                        <span class="text-[11px] font-medium text-zinc-500 uppercase tracking-wider block">Revenus Disponibles</span>
+                        <div class="mt-2 flex items-baseline gap-2">
+                            <input type="number" id="revenu-total" value="3000" class="bg-transparent text-xl font-semibold text-zinc-100 focus:outline-none w-28 font-mono border-b border-transparent focus:border-zinc-700">
+                            <span class="text-sm text-zinc-500">€</span>
+                            <button id="btn-calculer" class="ml-auto text-[11px] bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 px-2 py-1 rounded transition">Ajuster</button>
+                        </div>
+                    </div>
+                    <div class="bg-zinc-900 border border-zinc-800/80 rounded-lg p-5">
+                        <span class="text-[11px] font-medium text-zinc-500 uppercase tracking-wider block">Solde Restant Relatif</span>
+                        <div class="mt-2 flex items-baseline gap-1">
+                            <span class="text-xl font-bold tracking-tight text-zinc-100 font-mono" id="reste-a-vivre">0.00</span>
+                            <span class="text-sm text-zinc-500">€ disponibles</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulaire d'insertion épuré -->
+                <div class="bg-zinc-900 border border-zinc-800/80 rounded-lg p-5">
+                    <h2 class="text-xs font-semibold text-zinc-200 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i data-lucide="plus" class="w-3.5 h-3.5 text-zinc-400"></i> Enregistrer un flux financier
+                    </h2>
+                    <form id="form-depense" class="grid grid-cols-1 gap-3 sm:grid-cols-12">
+                        <div class="sm:col-span-5">
+                            <input type="text" id="depense-nom" placeholder="Description de la ligne" required class="w-full rounded-md bg-zinc-950 border border-zinc-800 px-3 py-2 text-zinc-200 placeholder-zinc-600 text-xs focus:outline-none focus:border-zinc-700">
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="number" id="depense-montant" placeholder="Valeur (€)" required min="0" step="0.01" class="w-full rounded-md bg-zinc-950 border border-zinc-800 px-3 py-2 text-zinc-200 placeholder-zinc-600 text-xs focus:outline-none focus:border-zinc-700 font-mono">
+                        </div>
+                        <div class="sm:col-span-4">
+                            <select id="depense-categorie" class="w-full rounded-md bg-zinc-950 border border-zinc-800 px-3 py-2 text-zinc-300 text-xs focus:outline-none focus:border-zinc-700">
+                                <option value="besoins">Charges Fixes (50%)</option>
+                                <option value="envies">Variables / Flux 30%</option>
+                                <option value="epargne">Actifs / Épargne (20%)</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-12 flex justify-end">
+                            <button type="submit" class="bg-zinc-100 text-zinc-950 text-xs font-medium px-3 py-1.5 rounded-md hover:bg-zinc-200 transition">
+                                Valider l'écriture
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Grand livre analytique -->
+                <div class="bg-zinc-900 border border-zinc-800/80 rounded-lg overflow-hidden">
+                    <div class="px-5 py-4 border-b border-zinc-800 flex justify-between items-center">
+                        <h2 class="text-xs font-semibold text-zinc-200 uppercase tracking-wider">Grand livre comptable</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead class="bg-zinc-950/40 text-zinc-500 font-mono border-b border-zinc-800">
+                                <tr>
+                                    <th class="p-4 font-normal">Libellé</th>
+                                    <th class="p-4 font-normal">Catégorie allocation</th>
+                                    <th class="p-4 font-normal text-right">Débit</th>
+                                    <th class="p-4 font-normal text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="liste-depenses" class="divide-y divide-zinc-800/50">
+                                <!-- JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="card summary-card">
-                <h3>Épargne (20%)</h3>
-                <p class="description">Investissements, projets...</p>
-                <div class="progress-bar"><div id="barre-epargne" class="progress"></div></div>
-                <p class="stats"><span id="depense-epargne">0</span>€ / <span id="limite-epargne">400</span>€</p>
-            </div>
-        </div>
 
-        <!-- Formulaire d'ajout de dépense -->
-        <div class="card">
-            <h2>💸 Ajouter une dépense</h2>
-            <form id="form-depense" class="form-inline">
-                <input type="text" id="depense-nom" placeholder="Ex: Courses Carrefour" required>
-                <input type="number" id="depense-montant" placeholder="Montant (€)" required min="0" step="0.01">
-                <select id="depense-categorie">
-                    <option value="besoins">Besoins (50%)</option>
-                    <option value="envies">Envies (30%)</option>
-                    <option value="epargne">Épargne / Projet (20%)</option>
-                </select>
-                <button type="submit">Ajouter</button>
-            </form>
-        </div>
+            <!-- MONITORS & CHARTS (Droite - 5 Colonnes) -->
+            <div class="lg:col-span-5 space-y-6">
+                <!-- Graphique Minimaliste -->
+                <div class="bg-zinc-900 border border-zinc-800/80 rounded-lg p-6 flex flex-col items-center">
+                    <h3 class="text-xs font-semibold text-zinc-200 uppercase tracking-wider mb-6 self-start">Allocation des enveloppes</h3>
+                    <div class="w-44 h-44 relative">
+                        <canvas id="budgetChart"></canvas>
+                    </div>
+                </div>
 
-        <!-- Historique des dépenses -->
-        <div class="card">
-            <h2>📜 Historique des opérations</h2>
-            <table id="tableau-depenses">
-                <thead>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Catégorie</th>
-                        <th>Montant</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="liste-depenses">
-                    <!-- Les lignes s'ajouteront ici dynamiquement -->
-                </tbody>
-            </table>
-        </div>
-    </div>
+                <!-- Analyseurs de Budgets Métriques (KPI) -->
+                <div class="bg-zinc-900 border border-zinc-800/80 rounded-lg p-5 space-y-5">
+                    <h3 class="text-xs font-semibold text-zinc-200 uppercase tracking-wider">Suivi des enveloppes</h3>
+                    
+                    <!-- Besoins -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-zinc-400 font-medium">Charges Fixes (50%)</span>
+                            <span class="text-zinc-500 font-mono"><span id="depense-besoins">0</span> / <span id="limite-besoins">0</span> €</span>
+                        </div>
+                        <div class="w-full bg-zinc-950 border border-zinc-800 h-1.5 rounded-full overflow-hidden">
+                            <div id="barre-besoins" class="bg-zinc-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
 
-    <script src="script.js"></script>
-</body>
-</html>
+                    <!-- Envies -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-zinc-400 font-medium">Variables / Flux (30%)</span>
+                            <span class="text-zinc-500 font-mono"><span id="depense-envies">0</span> / <span id="limite-envies">0</span> €</span>
+                        </div>
+                        <div class="w-full bg-zinc-950 border border-zinc-800 h-1.5 rounded-full overflow-hidden">
+                            <div id="barre-envies" class="bg-zinc-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Épargne -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-zinc-400 font-medium">Actifs / Épargne (20%)</span>
+                            <span class="text-zinc-500 font-mono"><span id="depense-epargne">0</span> / <span id="limite-epargne">0</span> €</span>
+                        </div>
