@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Budget Personnel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Gestion de Budget Personnel</h1>
+        
+        <!-- Section Configuration Revenus -->
+        <div class="card">
+            <h2>💰 Vos Revenus Mensuels</h2>
+            <div class="input-group">
+                <label for="revenu-total">Entrez votre revenu net (€) :</label>
+                <input type="number" id="revenu-total" value="2000" min="0">
+                <button id="btn-calculer">Appliquer la règle 50/30/20</button>
+            </div>
+        </div>
+
+        <!-- Section Graphique / Résumé visuel -->
+        <div class="dashboard-grid">
+            <div class="card summary-card">
+                <h3>Besoins (50%)</h3>
+                <p class="description">Loyer, factures, courses...</p>
+                <div class="progress-bar"><div id="barre-besoins" class="progress"></div></div>
+                <p class="stats"><span id="depense-besoins">0</span>€ / <span id="limite-besoins">1000</span>€</p>
+            </div>
+            <div class="card summary-card">
+                <h3>Envies (30%)</h3>
+                <p class="description">Loisirs, sorties, shopping...</p>
+                <div class="progress-bar"><div id="barre-envies" class="progress"></div></div>
+                <p class="stats"><span id="depense-envies">0</span>€ / <span id="limite-envies">6000</span>€</p>
+            </div>
+            <div class="card summary-card">
+                <h3>Épargne (20%)</h3>
+                <p class="description">Investissements, projets...</p>
+                <div class="progress-bar"><div id="barre-epargne" class="progress"></div></div>
+                <p class="stats"><span id="depense-epargne">0</span>€ / <span id="limite-epargne">400</span>€</p>
+            </div>
+        </div>
+
+        <!-- Formulaire d'ajout de dépense -->
+        <div class="card">
+            <h2>💸 Ajouter une dépense</h2>
+            <form id="form-depense" class="form-inline">
+                <input type="text" id="depense-nom" placeholder="Ex: Courses Carrefour" required>
+                <input type="number" id="depense-montant" placeholder="Montant (€)" required min="0" step="0.01">
+                <select id="depense-categorie">
+                    <option value="besoins">Besoins (50%)</option>
+                    <option value="envies">Envies (30%)</option>
+                    <option value="epargne">Épargne / Projet (20%)</option>
+                </select>
+                <button type="submit">Ajouter</button>
+            </form>
+        </div>
+
+        <!-- Historique des dépenses -->
+        <div class="card">
+            <h2>📜 Historique des opérations</h2>
+            <table id="tableau-depenses">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Catégorie</th>
+                        <th>Montant</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="liste-depenses">
+                    <!-- Les lignes s'ajouteront ici dynamiquement -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
